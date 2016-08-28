@@ -26,7 +26,7 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
      * This field is package private (= visible) for testing.
      * </p>
      */
-    final Object[] parameters;
+    private final Object[] parameters;
 
     /**
      * Format of test method name.
@@ -66,17 +66,15 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
     public String getName() {
         String result = nameFormat;
         for (BasePlaceholder placeHolder : Placeholders.all()) {
-            synchronized (placeHolder) {
-                placeHolder.setContext(getMethod(), idx, Arrays.copyOf(parameters, parameters.length));
-                result = placeHolder.process(result);
-            }
+            placeHolder.setContext(getMethod(), idx, Arrays.copyOf(getParameters(), getParameters().length));
+            result = placeHolder.process(result);
         }
         return result;
     }
 
     @Override
     public Object invokeExplosively(Object target, Object... params) throws Throwable {
-        return super.invokeExplosively(target, parameters);
+        return super.invokeExplosively(target, getParameters());
     }
 
     @Override
@@ -85,7 +83,7 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
         int result = super.hashCode();
         result = prime * result + idx;
         result = prime * result + ((nameFormat == null) ? 0 : nameFormat.hashCode());
-        result = prime * result + Arrays.hashCode(parameters);
+        result = prime * result + Arrays.hashCode(getParameters());
         return result;
     }
 
@@ -111,9 +109,13 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
         } else if (!nameFormat.equals(other.nameFormat)) {
             return false;
         }
-        if (!Arrays.equals(parameters, other.parameters)) {
+        if (!Arrays.equals(getParameters(), other.getParameters())) {
             return false;
         }
         return true;
+    }
+
+    public Object[] getParameters() {
+        return parameters;
     }
 }

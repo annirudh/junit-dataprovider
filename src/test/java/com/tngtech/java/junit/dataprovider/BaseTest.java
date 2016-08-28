@@ -69,7 +69,7 @@ public class BaseTest {
 
             DataProviderFrameworkMethod actual = (DataProviderFrameworkMethod) actuals.get(idx);
             assertThat(actual.idx).describedAs("at idx " + idx).isEqualTo(idx);
-            assertThat(actual.parameters).describedAs("at idx " + idx).isEqualTo(expecteds.get(idx));
+            assertThat(actual.getParameters()).describedAs("at idx " + idx).isEqualTo(expecteds.get(idx));
             assertThat(actual.nameFormat).describedAs("at idx " + idx).isEqualTo(expectedNameFormat);
         }
     }
