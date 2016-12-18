@@ -84,7 +84,7 @@ public class DataProviderFrameworkMethodTest extends BaseTest {
         assertThat(underTest).isNotNull();
         assertThat(underTest.getMethod()).isEqualTo(method);
         assertThat(underTest.idx).isEqualTo(idx);
-        assertThat(underTest.parameters).isEqualTo(parameters);
+        assertThat(underTest.getParameters()).isEqualTo(parameters);
         assertThat(underTest.nameFormat).isEqualTo(nameFormat);
     }
 

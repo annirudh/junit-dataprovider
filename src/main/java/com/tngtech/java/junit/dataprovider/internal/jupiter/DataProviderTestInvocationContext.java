@@ -1,19 +1,29 @@
-package com.tngtech.java.junit.dataprovider;
+package com.tngtech.java.junit.dataprovider.internal.jupiter;
 
 import static com.tngtech.java.junit.dataprovider.common.Preconditions.checkArgument;
 import static com.tngtech.java.junit.dataprovider.common.Preconditions.checkNotNull;
+import static java.util.Collections.singletonList;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
-import org.junit.runners.model.FrameworkMethod;
+import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.Placeholders;
 import com.tngtech.java.junit.dataprovider.internal.placeholder.BasePlaceholder;
 
-/**
- * A special framework method that allows the usage of parameters for the test method.
- */
-public class DataProviderFrameworkMethod extends FrameworkMethod {
+class DataProviderTestInvocationContext implements TestTemplateInvocationContext {
+
+    /**
+     * Exploded test method.
+     * <p>
+     * This field is package private (= visible) for testing.
+     * </p>
+     */
+    final Method method;
 
     /**
      * Index of exploded test method such that each get a unique name.
@@ -47,45 +57,39 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
      * @param parameters used for invoking this test method
      * @param nameFormat defines the format of the test method name according to {@code @}{@link DataProvider#format()}
      */
-    public DataProviderFrameworkMethod(Method method, int idx, Object[] parameters, String nameFormat) {
-        super(method);
-
+    public DataProviderTestInvocationContext(Method method, int idx, Object[] parameters, String nameFormat) {
+        checkNotNull(method, "method must not be null");
         checkNotNull(parameters, "parameter must not be null");
         checkNotNull(nameFormat, "nameFormat must not be null");
         checkArgument(parameters.length != 0, "parameter must not be empty");
 
+        this.method = method;
         this.idx = idx;
         this.parameters = Arrays.copyOf(parameters, parameters.length);
         this.nameFormat = nameFormat;
-    }
-
-    // TODO tmp
-    public int getIdx() {
-        return idx;
     }
 
     public Object[] getParameters() {
         return parameters;
     }
 
-    public String getNameFormat() {
-        return nameFormat;
-    }
-    // TODO tmp
-
     @Override
-    public String getName() {
+    public String getDisplayName(int invocationIndex) {
         String result = nameFormat;
         for (BasePlaceholder placeHolder : Placeholders.all()) {
-            placeHolder.setContext(getMethod(), idx, Arrays.copyOf(getParameters(), getParameters().length));
+            placeHolder.setContext(method, idx, Arrays.copyOf(getParameters(), getParameters().length));
             result = placeHolder.process(result);
         }
         return result;
+        // TODO
+        // return formatter.format(invocationIndex, arguments);
     }
 
     @Override
-    public Object invokeExplosively(Object target, Object... params) throws Throwable {
-        return super.invokeExplosively(target, getParameters());
+    public List<Extension> getAdditionalExtensions() {
+//        return super.invokeExplosively(target, getParameters());
+
+        return singletonList(new DataProviderTestParameterResolver(getParameters()));
     }
 
     @Override
@@ -109,7 +113,7 @@ public class DataProviderFrameworkMethod extends FrameworkMethod {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DataProviderFrameworkMethod other = (DataProviderFrameworkMethod) obj;
+        DataProviderTestInvocationContext other = (DataProviderTestInvocationContext) obj;
         if (idx != other.idx) {
             return false;
         }

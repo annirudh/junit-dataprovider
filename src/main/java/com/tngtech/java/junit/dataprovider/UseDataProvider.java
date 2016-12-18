@@ -7,6 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.tngtech.java.junit.dataprovider.internal.DefaultDataProviderMethodResolver;
+import com.tngtech.java.junit.dataprovider.internal.jupiter.DataProviderTestExtension;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Annotate a test method for using it with a dataprovider. The {@link #resolver()} is used to find a proper dataprovider.
@@ -14,6 +17,8 @@ import com.tngtech.java.junit.dataprovider.internal.DefaultDataProviderMethodRes
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@TestTemplate
+@ExtendWith(DataProviderTestExtension.class)
 public @interface UseDataProvider {
 
     public enum ResolveStrategy {
